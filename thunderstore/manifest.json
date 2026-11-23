@@ -1,7 +1,7 @@
 {
   "name": "PinABuildCost",
   "version_number": "0.1.0",
-  "website_url": "https://github.com/GKJ-Super-Fantasy-Kingdom/PinABuildCost",
+  "website_url": "https://github.com/GKJ-Super-Fantasy-Kingdom/pin-a-build-cost",
   "description": "Pin a building or upgrade and track missing materials beside the resource bar. Supports controller, keyboard and mouse.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2305",

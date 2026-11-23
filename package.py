@@ -14,11 +14,12 @@ project = ElementTree.parse(root / "PinABuildCost.csproj")
 version = project.findtext(".//Version")
 framework = project.findtext(".//TargetFramework")
 if (manifest["name"] != "PinABuildCost" or manifest["version_number"] != version
-        or manifest["website_url"] != "https://github.com/GKJ-Super-Fantasy-Kingdom/PinABuildCost"
+        or manifest["website_url"] != "https://github.com/GKJ-Super-Fantasy-Kingdom/pin-a-build-cost"
         or not manifest["dependencies"] or len(manifest["description"]) > 250):
     raise ValueError("Invalid package manifest")
 
 files = {
+    "LICENSE": root / "LICENSE",
     "manifest.json": listing / "manifest.json",
     "icon.png": listing / "icon.png",
     "README.md": root / "README.md",

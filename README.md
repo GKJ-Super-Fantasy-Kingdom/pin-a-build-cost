@@ -35,3 +35,9 @@ python package.py
 ```
 
 The default paths use the Steam install on D: and the local Daybook Dev profile. For other paths, pass `-p:GameDir="..."` and `-p:ProfileDir="..."` to the build and `--game "..." --profile "..."` to the check runner. Offline checks cover pin transitions, shortages, upgrade pricing and installing the shipped Harmony hooks against game 0.8.067. While compiling Unity calls outside a scene, embedded Mono can report unresolved Unity internal calls. A successful check run prints 16 PASS lines and exits with code 0. The controller playtest above requires a running game.
+
+## Contributing and license
+
+Bug reports and pull requests are welcome. See the [contribution guide](CONTRIBUTING.md) for local testing and reporting instructions.
+
+The original mod code is available under the [MIT License](LICENSE). Super Fantasy Kingdom, its game assets, and third-party dependencies retain their respective licenses and ownership.
