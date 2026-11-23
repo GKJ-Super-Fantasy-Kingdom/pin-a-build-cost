@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <GameDir Condition="'$(GameDir)' == ''">D:\SteamLibrary\steamapps\common\Super Fantasy Kingdom</GameDir>
+    <ProfileDir Condition="'$(ProfileDir)' == ''">$(APPDATA)\Thunderstore Mod Manager\DataFolder\SuperFantasyKingdom\profiles\Daybook Dev</ProfileDir>
+    <ManagedDir>$(GameDir)\Super Fantasy Kingdom_Data\Managed</ManagedDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../PinABuildCost.csproj" />
+    <Reference Include="Assembly-CSharp;UnityEngine.CoreModule">
+      <HintPath>$(ManagedDir)\%(Identity).dll</HintPath><Private>false</Private>
+    </Reference>
+    <Reference Include="BepInEx;0Harmony">
+      <HintPath>$(ProfileDir)\BepInEx\core\%(Identity).dll</HintPath><Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
