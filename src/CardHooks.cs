@@ -26,23 +26,44 @@ namespace PinABuildCost
             int checkAt = code.FindIndex(i => i.Calls(canBuild));
             if (drawAt < 2 || checkAt <= drawAt || !LoadsLocal(code[drawAt - 2].opcode) ||
                 code.Count(i => i.Calls(draw)) != 1 || code.Count(i => i.Calls(canBuild)) != 1)
-                throw new InvalidOperationException("Unrecognized building selection layout.");
+                return PinPlugin.UnsupportedLayout(code, "construction");
 
             code.InsertRange(checkAt, new[] {
                 new CodeInstruction(OpCodes.Dup),
                 new CodeInstruction(code[drawAt - 2].opcode, code[drawAt - 2].operand),
+                new CodeInstruction(OpCodes.Ldarg_2),
                 CodeInstruction.Call(typeof(BuildCards), nameof(Attach))
             });
             return code;
         }
 
-        private static bool LoadsLocal(OpCode op) => op == OpCodes.Ldloc || op == OpCodes.Ldloc_S ||
+        internal static bool LoadsLocal(OpCode op) => op == OpCodes.Ldloc || op == OpCodes.Ldloc_S ||
             op == OpCodes.Ldloc_0 || op == OpCodes.Ldloc_1 || op == OpCodes.Ldloc_2 || op == OpCodes.Ldloc_3;
 
-        private static void Attach(BuildingCity prefab, GameObject card)
+        internal static bool IsBonusList(BuildingSize size) =>
+            size == BuildingSize.WorldBig || size == BuildingSize.WorldSpecial;
+
+        private static void Attach(BuildingCity prefab, GameObject card, BuildingSize size)
         {
-            PinPlugin.TryAttach(() => PinRow.Create(card, card.GetComponent<Button>(),
-                new PinTarget(prefab, prefab.GetTitle(), () => prefab.GetCost())));
+            if (IsBonusList(size)) return;
+            PinPlugin.TryAttach(() => {
+                bool InRoster() => RaceManager.Instance.GetBuildings(prefab.GetBuildingSize()).Contains(prefab.gameObject);
+                bool trackedRoster = InRoster();
+                var target = new PinTarget(prefab, prefab.GetTitle(), () => prefab.GetCost(),
+                    permitted: _ => CanOffer(prefab), complete: () => trackedRoster && !InRoster());
+                PinRow.Create(card, card.GetComponent<Button>(), target);
+            });
+        }
+
+        internal static bool CanOffer(BuildingCity prefab)
+        {
+            var type = prefab.GetBuildingType();
+            var city = CityManager.Instance;
+            // Both the roster filter and the purchase check are mod extension points.
+            return city.CanBuild(type) &&
+                (type != BuildingType.WorldDifficulty || WorldManager.Instance.CanBuildBonfires() > 0) &&
+                (RaceManager.Instance.GetCanBeBuiltMultipleTimes().Contains(type) || city.GetBuilding(type) == null) &&
+                prefab.CanBeBuilt();
         }
     }
 
@@ -64,17 +85,30 @@ namespace PinABuildCost
         {
             if (building.GetUpgradeAmount() >= ___amountOfUpgrades) return;
             var list = OverlayManager.Instance.GetOverlaySelection();
-            if (list.childCount != __state + 1) return;
-            var card = list.GetChild(__state);
-            var purchase = card.Find("Upgrade/Container/Button")?.GetComponent<Button>();
-            var title = card.Find("Upgrade/Title")?.GetComponent<TMP_Text>();
-            if (purchase == null || title == null) return;
-            PinPlugin.TryAttach(() => {
-                var target = new PinTarget(building, building.GetTitle() + " · " + title.text,
-                    () => Price(__instance, building), building.GetUpgradeAmount() + 1);
-                var row = PinRow.Create(card.gameObject, purchase, target);
-                GamepadManager.Instance.SetGameObjectToSelect(row.gameObject);
-            });
+            for (int i = __state; i < list.childCount; i++)
+            {
+                var card = list.GetChild(i);
+                var purchase = card.Find("Upgrade/Container/Button")?.GetComponent<Button>();
+                var title = card.Find("Upgrade/Title")?.GetComponent<TMP_Text>();
+                if (purchase == null || title == null) continue;
+                PinPlugin.TryAttach(() => {
+                    var target = new PinTarget(building, building.GetTitle() + " · " + title.text,
+                        () => Price(__instance, building), building.GetUpgradeAmount() + 1,
+                        cost => building.CanBeUpgraded() && ResourceManager.Instance.CanBeBuilt(cost),
+                        complete: TrackRemoval(building, __instance), definition: __instance);
+                    var row = PinRow.Create(card.gameObject, purchase, target,
+                        actionStrip: purchase.transform.parent as RectTransform, rightButton: purchase.transform as RectTransform);
+                    GamepadManager.Instance.SetGameObjectToSelect(row.gameObject);
+                });
+                break;
+            }
+        }
+
+        internal static Func<bool> TrackRemoval(Building building, UIBuildingOverlayElement element)
+        {
+            var overlay = building.GetComponent<UIBuildingOverlay>();
+            if (overlay == null || overlay.buttons?.Contains(element) != true) return null;
+            return () => overlay == null || overlay.buttons?.Contains(element) != true;
         }
     }
 

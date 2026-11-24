@@ -10,7 +10,12 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--game", type=Path, default=Path(r"D:\SteamLibrary\steamapps\common\Super Fantasy Kingdom"))
 parser.add_argument("--profile", type=Path, default=Path(os.environ["APPDATA"]) /
                     "Thunderstore Mod Manager/DataFolder/SuperFantasyKingdom/profiles/Daybook Dev")
+parser.add_argument("--lone-bonfire", type=Path, help="Optional released LoneBonfire 1.1.1 DLL for the paired eligibility fixture")
 args = parser.parse_args()
+if args.lone_bonfire:
+    os.environ["PIN_TEST_LONE_BONFIRE"] = str(args.lone_bonfire.resolve(strict=True))
+else:
+    os.environ.pop("PIN_TEST_LONE_BONFIRE", None)
 managed = args.game / "Super Fantasy Kingdom_Data/Managed"
 runtime = args.game / "MonoBleedingEdge"
 built = Path(__file__).resolve().parent / "bin/Release/netstandard2.1"
@@ -37,8 +42,24 @@ assembly = bind("mono_domain_assembly_open", ptr, ptr, string)(domain, os.fsenco
 if not assembly:
     sys.exit("Build tests/PinChecks.csproj in Release first")
 image = bind("mono_assembly_get_image", ptr, ptr)(assembly)
-klass = bind("mono_class_from_name", ptr, ptr, string, string)(image, b"", b"Checks")
-method = bind("mono_class_get_method_from_name", ptr, ptr, string, c.c_int)(klass, b"Run", 0)
+find_class = bind("mono_class_from_name", ptr, ptr, string, string)
+find_method = bind("mono_class_get_method_from_name", ptr, ptr, string, c.c_int)
+# Only this offline Mono process uses scene stand-ins for these engine calls.
+scene = find_class(image, b"", b"SceneFixture")
+compile_method = bind("mono_compile_method", ptr, ptr)
+register = bind("mono_add_internal_call", None, string, ptr)
+for native, stand_in, arguments in [
+    ("Component::get_gameObject", "Owner", 1),
+    ("GameObject::get_activeInHierarchy", "HierarchyActive", 1),
+    ("GameObject::get_activeSelf", "Active", 1),
+    ("Behaviour::get_isActiveAndEnabled", "Enabled", 1),
+    ("GameObject::SetActive", "SetActive", 2),
+    ("Object::Destroy", "Destroy", 2),
+    ("Time::get_frameCount", "FrameCount", 0),
+]:
+    register(("UnityEngine." + native).encode(), compile_method(find_method(scene, stand_in.encode(), arguments)))
+klass = find_class(image, b"", b"Checks")
+method = find_method(klass, b"Run", 0)
 error = ptr()
 result = bind("mono_runtime_invoke", ptr, ptr, ptr, ptr, c.POINTER(ptr))(method, None, None, c.byref(error))
 if error or not result:

@@ -2,6 +2,7 @@
 from hashlib import sha256
 import json
 from pathlib import Path
+import re
 import struct
 from tempfile import TemporaryDirectory
 from xml.etree import ElementTree
@@ -23,6 +24,8 @@ files = {
     "manifest.json": listing / "manifest.json",
     "icon.png": listing / "icon.png",
     "README.md": root / "README.md",
+    "CHANGELOG.md": root / "CHANGELOG.md",
+    "CONTRIBUTING.md": root / "CONTRIBUTING.md",
     "plugins/PinABuildCost.dll": root / "bin" / "Release" / framework / "PinABuildCost.dll",
 }
 output = root / "dist" / f"PinABuildCost-{version}.zip"
@@ -38,6 +41,11 @@ with TemporaryDirectory(dir=output.parent) as scratch:
         for entry, source in files.items():
             if archive.read(entry) != source.read_bytes():
                 raise ValueError(f"Readback mismatch in {entry}")
+        for guide in ("README.md", "CONTRIBUTING.md"):
+            links = re.findall(r"\]\(([^)]+)\)", archive.read(guide).decode("utf-8"))
+            for link in links:
+                if not link.startswith(("https://", "http://", "#")) and link.split("#")[0] not in files:
+                    raise ValueError(f"Missing file linked from {guide}: {link}")
         png = archive.read("icon.png")
         if png[:8] != b"\x89PNG\r\n\x1a\n" or struct.unpack(">II", png[16:24]) != (256, 256):
             raise ValueError("Expected a 256 × 256 PNG")
