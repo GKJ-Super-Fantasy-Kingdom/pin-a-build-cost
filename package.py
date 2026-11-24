@@ -23,7 +23,7 @@ files = {
     "LICENSE": root / "LICENSE",
     "manifest.json": listing / "manifest.json",
     "icon.png": listing / "icon.png",
-    "README.md": root / "README.md",
+    "README.md": listing / "README.md",
     "CHANGELOG.md": root / "CHANGELOG.md",
     "CONTRIBUTING.md": root / "CONTRIBUTING.md",
     "plugins/PinABuildCost.dll": root / "bin" / "Release" / framework / "PinABuildCost.dll",
