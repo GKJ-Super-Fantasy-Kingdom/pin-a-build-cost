@@ -1,3 +1,5 @@
+# Pin a Build Cost
+
 Pin a building or upgrade to keep its material checklist beside the resource bar while you play. Close the building panel and you can still see what you need before you return to buy it.
 
 ## Features
@@ -27,11 +29,14 @@ Both captures show version 0.1.0 in-game at 1920 × 1080 in borderless fullscree
 
 ## Compatibility
 
-Tested on Super Fantasy Kingdom 0.8.068. The checklist works alongside **Daybook** and **Production Bottlenecks**. It follows changes to native prices, available stock and purchase rules. Mods that use their own purchase menus or private inventories can add pin support through the optional integration API.
-
-The shortcut follows the game’s UI/Tab binding. If a panel disables that action and your binding uses a custom hold or release, click the pin button or use focused controller confirm.
+- Tested on Super Fantasy Kingdom 0.8.068. The checklist follows changes to the game’s prices, available stock and purchase rules. Mods with private inventories or their own purchase menus can add pin support through the optional integration API.
+- With [Daybook](https://thunderstore.io/c/super-fantasy-kingdom/p/GKJ/Daybook/) 0.4.0 and [Production Bottlenecks](https://thunderstore.io/c/super-fantasy-kingdom/p/GKJ/ProductionBottlenecks/) 0.1.2, the pin left room for the expanded ledger and the building’s production status at both 1× and 1.5×.
+- With [LoneBonfire](https://thunderstore.io/c/super-fantasy-kingdom/p/ownlyme/LoneBonfire/) 1.1.1, a second Bonfire shows **Materials Ready · Requirements Pending** when you have enough materials but already own a Bonfire.
+- With [CheatMenu](https://thunderstore.io/c/super-fantasy-kingdom/p/ILM/CheatMenu/) 1.0.3, a doubled coin award reduced the pinned shortage by the full amount received.
+- On game 0.8.067, [DemolishAll](https://thunderstore.io/c/super-fantasy-kingdom/p/sfkbutter/DemolishAll/) 1.0.3 failed to add its demolition button, so that action could not be tested. The game’s own demolition action cleared the demolished building’s upgrade pin.
+- The shortcut follows the game’s UI/Tab binding. If a panel disables that action and your binding uses a custom hold or release, click the pin button or use focused controller confirm.
 
 ## Installation
 
 1. Select **Super Fantasy Kingdom** and your profile in Thunderstore Mod Manager. Use **Install with App** on this listing.
-2. Allow the manager to install **BepInExPack** and **HideManagerGameObject_Config**, then launch the modded game.
+2. Allow the manager to install [BepInExPack](https://thunderstore.io/c/super-fantasy-kingdom/p/BepInEx/BepInExPack/) and [HideManagerGameObject_Config](https://thunderstore.io/c/super-fantasy-kingdom/p/BepInEx/HideManagerGameObject_Config/), then launch the modded game.
