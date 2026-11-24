@@ -35,6 +35,7 @@ namespace PinABuildCost
         private PinPlugin owner;
         private Button purchaseButton;
         private bool retired;
+        internal bool UseAsFocusFallback;
         internal bool HasVisibleOffer => !retired && cardRect != null && purchaseButton != null &&
             cardRect.gameObject.activeInHierarchy && purchaseButton.isActiveAndEnabled;
         private bool showShortcut;
@@ -161,6 +162,15 @@ namespace PinABuildCost
             owner.Changed += Label;
             GamepadManager.OnControlSchemeChanged += SchemeChanged;
             Bind();
+        }
+
+        private void Start()
+        {
+            // A later purchase row may be affordable. Let the native panel finish drawing
+            // and choose it before offering a pin as the controller's initial selection.
+            if (UseAsFocusFallback && HasVisibleOffer && GamepadManager.Instance != null &&
+                GamepadManager.Instance.GetGameObjectToSelect() == null)
+                GamepadManager.Instance.SetGameObjectToSelect(gameObject);
         }
 
         private void OnDisable()

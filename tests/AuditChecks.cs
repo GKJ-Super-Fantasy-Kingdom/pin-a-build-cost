@@ -41,6 +41,7 @@ internal static class AuditChecks
         tiers = null;
         check(second.IsFinished() && second.Price() == null, "removing the entire tier schedule is safe");
 
+        CheckInitialFocus(check);
         CheckCardLifecycle(check);
         var keyboard = new InputBinding("<Keyboard>/tab");
         check(PinRow.SupportsBinding(false, null, keyboard), "plain disabled-map button binding retains shortcut");
@@ -85,7 +86,7 @@ internal static class AuditChecks
         check(optedIn.Read(true, _ => 0, name).Status == "Ready" && optedIn.Read(true, _ => 0, name).Items[0].Text == "Board · Free",
             "integration can opt its private wallet into free mode");
         gate = false;
-        check(optedIn.Read(true, _ => 0, name).Status == "Materials Ready · Requirements Pending",
+        check(optedIn.Read(true, _ => 0, name).Status == "Requirements Pending",
             "waiving a wallet leaves the mod's additional purchase gate active");
         wallet = 10;
         gate = true;
@@ -125,7 +126,7 @@ internal static class AuditChecks
         check(Status() == "Ready", "standalone funded construction pin permits a repeatable Bonfire");
         AccessTools.Method(released.GetType("LoneBonfire.Patch_LearnBonfireType", true), "Postfix").Invoke(null, new object[] { placed });
         harmony.PatchAll(released.GetType("LoneBonfire.Patch_CapBonfire", true));
-        check(Status() == "Materials Ready · Requirements Pending", "released LoneBonfire purchase patch blocks the funded repeat offer");
+        check(Status() == "Requirements Pending", "released LoneBonfire purchase patch blocks the funded repeat offer");
         buildings.Clear();
         check(Status() == "Ready", "LoneBonfire permits the funded offer when the city's Bonfire is removed");
     }
@@ -139,6 +140,29 @@ internal static class AuditChecks
     {
         __result = 7;
         return false;
+    }
+
+    private static void CheckInitialFocus(Action<bool, string> check)
+    {
+        var buy = SceneFixture.New<GameObject>();
+        var root = SceneFixture.New<GameObject>();
+        var row = SceneFixture.New<PinRow>(root);
+        row.UseAsFocusFallback = true;
+        AccessTools.Field(typeof(PinRow), "cardRect").SetValue(row, SceneFixture.New<RectTransform>(buy));
+        AccessTools.Field(typeof(PinRow), "purchaseButton").SetValue(row, SceneFixture.New<Button>(buy));
+        var manager = SceneFixture.New<GamepadManager>();
+        GamepadManager.Instance = manager;
+        try
+        {
+            var start = AccessTools.Method(typeof(PinRow), "Start");
+            manager.SetGameObjectToSelect(buy);
+            start.Invoke(row, null);
+            check(manager.GetGameObjectToSelect() == buy, "a later native purchase keeps the initial selection");
+            manager.SetGameObjectToSelect(null);
+            start.Invoke(row, null);
+            check(manager.GetGameObjectToSelect() == root, "a panel without a native selection falls back to a pin");
+        }
+        finally { GamepadManager.Instance = null; }
     }
 
     private static void CheckCardLifecycle(Action<bool, string> check)

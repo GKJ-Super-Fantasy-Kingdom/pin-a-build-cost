@@ -30,21 +30,24 @@ namespace PinABuildCost
         }
 
         internal static PinTarget ForCallback(UnityAction call, ResourceAmount quote)
+            => ForSource(call.Target, call.Method.Name, quote);
+
+        internal static PinTarget ForSource(object source, string callback, ResourceAmount quote)
         {
-            if (call.Target is BuildingWitch witch && call.Method.Name == "UnlockBonfire")
+            if (source is BuildingWitch witch && callback == "UnlockBonfire")
             {
                 int count = RaceDataManager.Instance.GetBonfiresUnlocked();
                 // This unlock quotes a star threshold in the dialog. There is no price getter.
                 return Single(witch, "Bonfire Unlock", () => quote,
                     () => RaceDataManager.Instance.GetBonfiresUnlocked() > count, count + 1);
             }
-            if (call.Method.Name != "Callback") return null;
-            if (call.Target is RepairableBuilding repair)
+            if (callback != "Callback") return null;
+            if (source is RepairableBuilding repair)
             {
                 var prefab = AccessTools.FieldRefAccess<RepairableBuilding, BuildingCity>(repair, "toSpawn");
                 return Single(repair, prefab.GetTitle(), () => repair.cost);
             }
-            if (call.Target is BuildingSpotWorld spot)
+            if (source is BuildingSpotWorld spot)
             {
                 var resource = AccessTools.FieldRefAccess<BuildingSpotWorld, ResourceType>(spot, "resource");
                 string title = RaceManager.Instance.GetResourceData(resource)?.GetName() ?? resource.ToString();
@@ -52,7 +55,7 @@ namespace PinABuildCost
                     AccessTools.Method(typeof(BuildingSpotWorld), "GetTotalCost"));
                 return Single(spot, title + " · Rebuild", () => new ResourceAmount(quote.type, price(spot)));
             }
-            if (call.Target is BuildingWorldStartingResource site)
+            if (source is BuildingWorldStartingResource site)
             {
                 int next = site.GetUpgrade() + 1;
                 var field = AccessTools.FieldRefAccess<BuildingWorldStartingResource, ResourceAmount[]>("cost");
@@ -61,7 +64,7 @@ namespace PinABuildCost
                         AccessTools.FieldRefAccess<BuildingWorldStartingResource, int>(site, "requiredStars"),
                     cost => ResourceManager.Instance.CanBeBuilt(cost));
             }
-            if (call.Target is RaceUnlockablePlaceholder unlock)
+            if (source is RaceUnlockablePlaceholder unlock)
             {
                 return Single(unlock, Title(unlock),
                     () => AccessTools.FieldRefAccess<RaceUnlockablePlaceholder, ResourceAmount>(unlock, "cost"),

@@ -1,69 +1,46 @@
 # Pin a Build Cost
 
-Pin a building or upgrade to show its material checklist beside the resource bar. An empty box shows how much of that material is still missing. Once you have enough, the same row gains a green check and shows the fulfilled cost (for example, **Boards · 12/12**). Spending those boards reopens the box and updates the shortage. The checklist follows the current price and available stock every half second, even with the building menu closed.
+Pin a building or upgrade to keep its material checklist beside the resource bar while you play. Close the building panel and you can still see what you need before you return to buy it.
 
-**Ready** means the offer's purchase check passes. The checklist adds up entries for each material. If an offer lists 3 boards and 7 boards separately, the native purchase can accept 7 in stock. In that case the pin shows **Ready** alongside **3 short** of the combined 10. **Materials Ready · Requirements Pending** means the materials are covered but a building, kingdom or mod rule still blocks the offer. **Cost Unavailable** means the mod could not read a valid price.
+## Features
 
-## The Castle
+- Track one purchase at a time, including an unaffordable upgrade such as the Castle’s **Increase storage** or **Wall**.
+- The checklist uses the same material icons as the purchase card when space allows. Each material gets a green check when you have enough. Spend some of it and the row shows how much you still need. The checklist refreshes every half second.
+- **Ready** means the purchase check passes. **Requirements Pending** means you have the materials but another rule still blocks the purchase.
+- Building the tracked design on any plot clears a construction pin. An upgrade pin clears when that purchase completes on the chosen building. Demolishing a building also clears its upgrade pin.
+- Continuing a kingdom restores the pin from its saved checkpoint at the current price. Replaying an earlier dawn restores that dawn’s pin. Old saves without a pin and new runs start empty.
 
-**Increase storage** and **Wall** each have their own pin button. You can pin a greyed-out purchase while collecting materials. Only one upgrade is tracked at a time. Moving focus to **Replace Pin** previews the action and keeps the current checklist. Activating the button switches the pin.
+## How to Use
 
-**1× UI scale.** Increase storage is pinned, and the checklist shows two ingots missing. Storage offers **Unpin** and the Wall’s **Replace Pin** button has controller focus.
+1. Open a construction card or supported upgrade and choose **Pin Cost**. Click it with the mouse, or focus it with a controller and use the game’s confirm button.
+2. For the shortcut, focus the offer and press **Tab** on keyboard, **Y** on Xbox, or **Triangle** on PlayStation by default. A panel with one offer also accepts the shortcut from another control, such as **Cancel** in Repair Church.
+3. Choose **Replace Pin** on another offer to switch targets. Moving focus there keeps your original pin until you activate the button. Choose **Unpin** on the tracked offer to clear it. Your selection is recorded the next time the game saves a checkpoint.
 
-![Castle at 1× with Increase storage pinned and Replace Pin focused under Wall](https://raw.githubusercontent.com/GKJ-Super-Fantasy-Kingdom/pin-a-build-cost/main/docs/screenshots/0.1.0/castle-storage-wall-focus-1x.png)
+## Screenshots
 
-**1.5× UI scale.** The same Storage checklist and both Castle actions remain visible. Both screenshots came from the game at 1920 × 1080 in borderless fullscreen with simulated controller input.
+Captured in version 0.2.1 at 1920 × 1080 in borderless fullscreen with a virtual Xbox-style controller. The second capture uses a copied kingdom with two boards added for the Ready check.
 
-![Castle at 1.5× with the Storage checklist and both Castle actions visible](https://raw.githubusercontent.com/GKJ-Super-Fantasy-Kingdom/pin-a-build-cost/main/docs/screenshots/0.1.0/castle-storage-wall-focus-1.5x.png)
+![Storage upgrade pinned with two ingots missing and controller focus on Wall’s Replace Pin button](https://raw.githubusercontent.com/GKJ-Super-Fantasy-Kingdom/pin-a-build-cost/main/docs/screenshots/0.2.1/castle-storage-short-1x.png)
 
-## Controls
+**1× UI scale.** Storage needs five ingots and the kingdom has three. The checklist shows two missing while Wall offers **Replace Pin**.
 
-- In a panel with one building offer, use the pin shortcut from any control. For example, you can pin **Add chamber** from the Tavern's worker controls, or **Repair Church** while **Cancel** has focus. The default is **Y** on Xbox, **Triangle** on PlayStation, or **Tab** on keyboard. The prompt follows the game's UI/Tab binding. If a panel disables that action and your binding uses a custom interaction such as hold or release, use click or focused confirm on the pin button.
-- In a list with several offers, the shortcut follows the focused card. With keyboard and mouse, it can also follow a hovered card when no card has focus. Only the target shows the shortcut. Moving focus to another panel hides it. The Outpost bonus list keeps its native controls.
-- You can also click **Pin Cost**, or focus it and use the normal UI confirm action. Look beside **Upgrade**, between the actions in a world-site confirmation, or below a construction card. The pin button stays available when the purchase is unaffordable. Pinning keeps the menu open.
-- **Replace Pin** switches to another target. **Unpin** removes the current target. A construction pin clears when that building design is built at any plot. An upgrade pin follows the chosen building instance and level. Leaving the menu or reaching **Ready** keeps the pin.
-- A pin lasts for the current play session. Loading a run clears it. Demolishing a building clears its upgrade pin. Removing a pinned design from the active construction roster clears its pin, so another variant cannot silently inherit it.
+![Restored Wall pin showing a checked board row, six of six boards and Ready beside the Castle panel](https://raw.githubusercontent.com/GKJ-Super-Fantasy-Kingdom/pin-a-build-cost/main/docs/screenshots/0.2.1/castle-wall-ready-1.5x.png)
+
+**1.5× UI scale.** Wall is pinned after Continue. The six boards cover its full cost, and the checklist clears the Castle title ribbon.
 
 ## Compatibility
 
-Construction pins use the actual prefab on each native card. Buildings added to that list can be pinned without registering their names or resource types. Standard upgrade pins read the price for the chosen building, upgrade and tier. If a mod adds a second upgrade at the same tier, each choice keeps its own price when you revisit the menu. Dedicated hooks also cover capacity purchases, evolution outposts and supported world-site repair, rebuild and unlock dialogs.
+- Tested on Super Fantasy Kingdom 0.8.068. The checklist follows changes to the game’s prices, available stock and purchase rules. Mods with private inventories or their own purchase menus can add pin support through the optional integration API. If a price cannot be read, the checklist shows **Cost Unavailable**.
+- With [Daybook](https://thunderstore.io/c/super-fantasy-kingdom/p/GKJ/Daybook/) 0.4.2 and [Production Bottlenecks](https://thunderstore.io/c/super-fantasy-kingdom/p/GKJ/ProductionBottlenecks/) 0.2.2, opening the ledger or the Blocked Buildings list preserved the pin at both UI scales.
+- With [LoneBonfire](https://thunderstore.io/c/super-fantasy-kingdom/p/ownlyme/LoneBonfire/) 1.1.1, a second Bonfire shows **Requirements Pending** when you have enough materials but already own a Bonfire.
+- With [CheatMenu](https://thunderstore.io/c/super-fantasy-kingdom/p/ILM/CheatMenu/) 1.0.3, a doubled coin award reduced the pinned shortage by the full amount received.
+- On game 0.8.067, [DemolishAll](https://thunderstore.io/c/super-fantasy-kingdom/p/sfkbutter/DemolishAll/) 1.0.3 failed to add its demolition button, so that action could not be tested. The game’s own demolition action cleared the demolished building’s upgrade pin.
+- If a purchase lists one material twice, the checklist shows its combined total. **Ready** still follows the game’s purchase check, which can accept the two entries separately.
+- The shortcut follows the game’s UI/Tab binding. If a panel disables that action and your binding uses a custom hold or release, click the pin button or use focused controller confirm.
+- The HUD leaves room for native controls. If neither side has enough space, the checklist hides until space opens up and the target stays pinned.
+- If another mod supplies a private purchase, reopen its card after continuing so it can provide its price and inventory again. The pin can return when the same owner and purchase can be identified.
 
-Mods that adjust the game's price, available-stock or construction-eligibility methods are reflected in the pin. The witch's bonfire unlock uses the star quote from the most recently opened dialog. Mods with their own menus, private inventories or purchase-only discounts can optionally use `PinABuildCost.PinCostApi.Attach` when drawing the card. Supply a stable owner and a mod-qualified operation ID, a current price getter and a completion check. Optional stock and eligibility getters let the pin use the same rules as the purchase.
+## Installation
 
-Evolution pins follow the unit and the selected Outpost plot. Using that plot for another unit retires its pin. Removing a starting-resource upgrade tier also retires its pin. When filtering or recycling an individual card or its purchase control, call `Attach` again when drawing its next offer. A custom `readStock` wallet must cover the combined price even during global free building. Integrations whose purchases waive that wallet can pass `honorFreeBuilding: true` to the extended overload. Additional eligibility rules still apply.
-
-The pin uses the game's button artwork and focus highlight. When another action occupies the space beside a purchase, the pin uses its own row. The HUD uses the resource bar's frame and font, lets pointer input pass through, and leaves room for the building panel, header controls and Daybook ledger. If neither side has enough space, the readout hides until room opens up. The target stays pinned.
-
-## Local import
-
-1. Coordinate a free test session if others are using the game. In Thunderstore Mod Manager, select **Super Fantasy Kingdom** and a disposable test profile.
-2. Use **Settings → Import local mod**, then choose `dist/PinABuildCost-0.1.0.zip`. Confirm the mod and both BepInEx dependencies are enabled. Enable Daybook in the same profile for the HUD check.
-3. Use **Start modded** and open a building plot. Each offered building should have a **Pin Cost** action. Look for `Pin a Build Cost 0.1.0 ready.` in the BepInEx log.
-
-## Controller playtest
-
-1. Using only a controller, open a plot and navigate to an unaffordable building. Verify the pin prompt and focus highlight. Activate the pin once. The build menu stays open and no materials are spent. Check normal navigation, tab switching, confirm and back.
-2. Close and reopen the list. Compare the HUD with the card cost minus available stock. Pin a different building, then unpin it. Pin again and build something unrelated. The original target should remain.
-3. Meet one material requirement and check that its row stays in place with a green check. Meet the rest to reach **Ready**, then spend one material. Only its box should reopen. Complete the pinned building and check the panel disappears.
-4. Pin an upgrade. Check the building name, upgrade name and target level. Upgrade another instance first, then the pinned instance. Only the latter should clear the pin. Repeat on a small building with a scaling price when available.
-5. Switch to keyboard and mouse. Use Tab on a focused or hovered card, then click its pin row. Switch back to the controller and check the prompt updates. Try ordinary confirm on the separate pin row.
-   For both input schemes, focus a Tavern worker control and pin **Add chamber**. Open **Repair Church**, focus **Cancel**, replace the pin and then unpin it. Each press should change the pin once, retain focus and leave the purchase untouched. Open the Outpost bonus list and move between its bonus cards.
-6. Start in **Windowed Full Screen**. At UI scales **1** and **1.5**, pin a long target name with several missing materials. Expand the Daybook ledger and food breakdown together. Check that the counts, pin and ledger remain readable. With Production Bottlenecks enabled, open a blocked building and check that its status and the native Upgrade control stay in place.
-
-## Build and offline checks
-
-The Release project references the installed game's managed assemblies and BepInEx core in an existing profile. The checks use 64-bit Python and the game's embedded Mono runtime in a separate process.
-
-```powershell
-dotnet build tests/PinChecks.csproj -c Release
-python tests/run.py
-python package.py
-```
-
-The default paths use the Steam install on D: and the local Daybook Dev profile. For other paths, pass `-p:GameDir="..."` and `-p:ProfileDir="..."` to the build and `--game "..." --profile "..."` to the check runner. Offline checks cover changing prices and stock, eligibility, pin identity and completion, and installing the shipped Harmony hooks against game 0.8.068. Embedded Mono can report unresolved Unity internal calls outside a scene. A successful check run exits with code 0. The controller playtest above requires a running game.
-
-## Contributing and license
-
-Bug reports and pull requests are welcome. See the [contribution guide](CONTRIBUTING.md) for local testing and reporting instructions.
-
-The original mod code is available under the [MIT License](LICENSE). Super Fantasy Kingdom, its game assets, and third-party dependencies retain their respective licenses and ownership.
+1. Select **Super Fantasy Kingdom** and your profile in Thunderstore Mod Manager. Use **Install with App** on this listing.
+2. Allow the manager to install [BepInExPack](https://thunderstore.io/c/super-fantasy-kingdom/p/BepInEx/BepInExPack/) and [HideManagerGameObject_Config](https://thunderstore.io/c/super-fantasy-kingdom/p/BepInEx/HideManagerGameObject_Config/), then launch the modded game.

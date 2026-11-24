@@ -47,12 +47,16 @@ namespace PinABuildCost
         {
             if (IsBonusList(size)) return;
             PinPlugin.TryAttach(() => {
-                bool InRoster() => RaceManager.Instance.GetBuildings(prefab.GetBuildingSize()).Contains(prefab.gameObject);
-                bool trackedRoster = InRoster();
-                var target = new PinTarget(prefab, prefab.GetTitle(), () => prefab.GetCost(),
-                    permitted: _ => CanOffer(prefab), complete: () => trackedRoster && !InRoster());
-                PinRow.Create(card, card.GetComponent<Button>(), target);
+                PinRow.Create(card, card.GetComponent<Button>(), ForPrefab(prefab));
             });
+        }
+
+        internal static PinTarget ForPrefab(BuildingCity prefab)
+        {
+            bool InRoster() => RaceManager.Instance.GetBuildings(prefab.GetBuildingSize()).Contains(prefab.gameObject);
+            bool trackedRoster = InRoster();
+            return new PinTarget(prefab, prefab.GetTitle(), () => prefab.GetCost(),
+                permitted: _ => CanOffer(prefab), complete: () => trackedRoster && !InRoster());
         }
 
         internal static bool CanOffer(BuildingCity prefab)
@@ -92,21 +96,25 @@ namespace PinABuildCost
                 var title = card.Find("Upgrade/Title")?.GetComponent<TMP_Text>();
                 if (purchase == null || title == null) continue;
                 PinPlugin.TryAttach(() => {
-                    var target = new PinTarget(building, building.GetTitle() + " · " + title.text,
-                        () => Price(__instance, building), building.GetUpgradeAmount() + 1,
-                        cost => building.CanBeUpgraded() && ResourceManager.Instance.CanBeBuilt(cost),
-                        complete: TrackRemoval(building, __instance), definition: __instance);
+                    var target = ForUpgrade(building, __instance, title.text);
                     var row = PinRow.Create(card.gameObject, purchase, target,
                         actionStrip: purchase.transform.parent as RectTransform, rightButton: purchase.transform as RectTransform);
-                    GamepadManager.Instance.SetGameObjectToSelect(row.gameObject);
+                    row.UseAsFocusFallback = true;
                 });
                 break;
             }
         }
 
+        internal static PinTarget ForUpgrade(Building building, UIBuildingOverlayElementUpgrade offer, string title) =>
+            new PinTarget(building, building.GetTitle() + " · " + title, () => Price(offer, building),
+                building.GetUpgradeAmount() + 1, cost => building.CanBeUpgraded() && ResourceManager.Instance.CanBeBuilt(cost),
+                complete: TrackRemoval(building, offer), definition: offer);
+
+        internal static UIBuildingOverlay Overlay(Building building) => building.GetComponent<UIBuildingOverlay>();
+
         internal static Func<bool> TrackRemoval(Building building, UIBuildingOverlayElement element)
         {
-            var overlay = building.GetComponent<UIBuildingOverlay>();
+            var overlay = Overlay(building);
             if (overlay == null || overlay.buttons?.Contains(element) != true) return null;
             return () => overlay == null || overlay.buttons?.Contains(element) != true;
         }

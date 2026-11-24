@@ -8,11 +8,13 @@ namespace PinABuildCost
 {
     internal readonly struct MaterialCheck
     {
+        internal readonly ResourceType Resource;
         internal readonly string Text;
         internal readonly bool IsMet;
 
-        internal MaterialCheck(string text, bool isMet)
+        internal MaterialCheck(ResourceType resource, string text, bool isMet)
         {
+            Resource = resource;
             Text = text;
             IsMet = isMet;
         }
@@ -20,6 +22,7 @@ namespace PinABuildCost
 
     internal sealed class CostChecklist
     {
+        internal const string Ready = "Ready";
         internal static readonly CostChecklist Unavailable = new CostChecklist(Array.Empty<MaterialCheck>(), "Cost Unavailable");
         internal readonly MaterialCheck[] Items;
         internal readonly string Status;
@@ -41,6 +44,8 @@ namespace PinABuildCost
         private readonly Func<ResourceAmount[], bool> permitted;
         private readonly string operation;
         private readonly object definition;
+        internal string Operation => operation;
+        internal object Definition => definition;
         private readonly Func<ResourceType, int> readStock;
         private readonly bool honorFreeBuilding;
         private readonly bool purchaseChecksStock;
@@ -109,12 +114,12 @@ namespace PinABuildCost
                 bool met = missing <= 0;
                 allMet &= met;
                 string amount = free ? "Free" : met ? $"{entry.Value}/{entry.Value}" : $"{missing} short";
-                items[index++] = new MaterialCheck(name(entry.Key) + " · " + amount, met);
+                items[index++] = new MaterialCheck(entry.Key, name(entry.Key) + " · " + amount, met);
             }
             // Native purchases can accept separate entries for the same resource. Keep
             // the total visible, but let their actual purchase predicate decide Ready.
             bool ready = permitted == null ? allMet : (purchaseChecksStock || allMet) && permitted(price);
-            string status = ready ? "Ready" : allMet ? "Materials Ready · Requirements Pending" : null;
+            string status = ready ? CostChecklist.Ready : allMet ? "Requirements Pending" : null;
             return new CostChecklist(items, status);
         }
     }

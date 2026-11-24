@@ -85,3 +85,15 @@ The README screenshots are from a further in-game run with Daybook 0.4.0 enabled
 ## Remaining coverage
 
 Physical controller prompts, remapping and navigation still need a hands-on pass. Other kingdoms, a released building or upgrade content pack, and each special purchase need their own playtests. Mods with private purchase logic can supply their current price, inventory, eligibility and completion through `PinCostApi.Attach`. The witch's star quote refreshes when its dialog reopens.
+
+## Checkpoint persistence in local test build 0.2.0
+
+The Release build passed 107 offline checks using a copy of a day-nine Human kingdom. A second run passed 110 with the released LoneBonfire 1.1.1 purchase patch. The standalone suite also passed with its synthetic kingdom. Use `--checkpoint-copy "path/to/copied/1_human_game.data"` with the offline runner to repeat the copied-save cases. The runner writes its save and backup inside a disposable test directory.
+
+The tests exercised the installed game's save writer, backup rotation, file reader, tavern rewrite and the mod's restore code. The fixture supplied Unity's native JSON conversion and reconstructed scene objects in a separate Mono process. Storage and Wall remained distinct after the Castle rows changed order and price. Replaying the earlier dawn restored Storage. The same-type building test used houses at different positions from the copied kingdom. Missing buildings, retired designs, completed tiers, an unpin, a legacy save and a mismatched run all cleared correctly.
+
+In the combined 0.2.0 live run, a virtual gamepad pinned Increase storage, moved focus to Wall and replaced the pin. The copied night checkpoint continued into the Tavern. Its native dawn save restored Wall in a fresh game process before opening Castle. At both UI scales the HUD showed two boards missing against the native price of six and stock of four. The two-building case and private-card reattachment still need live verification.
+
+## UI review in local test build 0.2.1
+
+The Release suite passed 111 checks against a copied Human kingdom checkpoint and 114 with LoneBonfire 1.1.1. The added checks cover aggregation and repricing independently of a material's localized name, and preserve the native initial purchase selection while allowing a pin fallback on unfunded panels.

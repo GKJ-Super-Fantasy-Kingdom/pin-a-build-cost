@@ -5,12 +5,15 @@ import os
 from pathlib import Path
 import struct
 import sys
+import tempfile
+from shutil import copyfile
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--game", type=Path, default=Path(r"D:\SteamLibrary\steamapps\common\Super Fantasy Kingdom"))
 parser.add_argument("--profile", type=Path, default=Path(os.environ["APPDATA"]) /
                     "Thunderstore Mod Manager/DataFolder/SuperFantasyKingdom/profiles/Daybook Dev")
 parser.add_argument("--lone-bonfire", type=Path, help="Optional released LoneBonfire 1.1.1 DLL for the paired eligibility fixture")
+parser.add_argument("--checkpoint-copy", type=Path, help="Optional copy of a kingdom .data checkpoint; tests write only in a temporary profile")
 args = parser.parse_args()
 if args.lone_bonfire:
     os.environ["PIN_TEST_LONE_BONFIRE"] = str(args.lone_bonfire.resolve(strict=True))
@@ -19,6 +22,10 @@ else:
 managed = args.game / "Super Fantasy Kingdom_Data/Managed"
 runtime = args.game / "MonoBleedingEdge"
 built = Path(__file__).resolve().parent / "bin/Release/netstandard2.1"
+profile_copy = tempfile.TemporaryDirectory(dir=built)
+os.environ["PIN_CHECKPOINT_FIXTURE"] = profile_copy.name
+if args.checkpoint_copy:
+    copyfile(args.checkpoint_copy, Path(profile_copy.name) / "original.data")
 core = args.profile / "BepInEx/core"
 assert struct.calcsize("P") == 8, "Use 64-bit Python"
 os.environ["MONO_PATH"] = os.pathsep.join(map(str, [managed, built, core]))
@@ -56,6 +63,11 @@ for native, stand_in, arguments in [
     ("GameObject::SetActive", "SetActive", 2),
     ("Object::Destroy", "Destroy", 2),
     ("Time::get_frameCount", "FrameCount", 0),
+    ("Object::GetName", "Name", 1),
+    ("Component::get_transform", "Location", 1),
+    ("Transform::get_position_Injected", "Position", 2),
+    ("JsonUtility::FromJsonInternal", "FromJson", 3),
+    ("JsonUtility::ToJsonInternal", "ToJson", 2),
 ]:
     register(("UnityEngine." + native).encode(), compile_method(find_method(scene, stand_in.encode(), arguments)))
 klass = find_class(image, b"", b"Checks")

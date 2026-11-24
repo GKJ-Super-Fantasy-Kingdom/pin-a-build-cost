@@ -47,6 +47,11 @@ internal static class Checks
             Func<ResourceType, int> stock = t => t == ResourceType.Board ? boards : 2;
             Func<ResourceType, string> name = t => t.ToString();
             var mixed = PinTarget.Describe(costs, stock, name);
+            Check(mixed.Items.Select(item => item.Resource).SequenceEqual(new[] { ResourceType.Board, ResourceType.Stone }),
+                "checklist carries one native resource identity per aggregated material");
+            var repriced = PinTarget.Describe(new[] { new ResourceAmount(ResourceType.Ingot, 5) }, stock, _ => "Material");
+            Check(repriced.Items.Single().Resource == ResourceType.Ingot && repriced.Items.Single().Text == "Material · 3 short",
+                "runtime price changes keep the icon tied to the live type independently of its localized name");
             var nativeOffer = new PinTarget(first, "Native split price", () => costs,
                 permitted: quote => quote.All(part => stock(part.type) >= part.amount));
             var split = nativeOffer.Read(false, stock, name);
@@ -112,6 +117,7 @@ internal static class Checks
             {
                 var plugin = typeof(PinPlugin).Assembly;
                 AuditChecks.Run(Check, harmony);
+                CheckpointChecks.Run(Check, harmony);
                 foreach (var type in new[] { "BuildCards", "UpgradeCards", "TabFocus", "BuildCompletion",
                     "CapacityCards", "CastleUpgradeCards", "WorldBuildOffers", "WorldUnlockCompletion", "EvolutionPlot", "EvolutionCards" })
                 {

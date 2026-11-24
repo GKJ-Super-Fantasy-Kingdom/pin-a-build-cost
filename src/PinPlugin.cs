@@ -10,7 +10,7 @@ using UnityEngine.EventSystems;
 
 namespace PinABuildCost
 {
-    [BepInPlugin("sfk.pinabuildcost", "Pin a Build Cost", "0.1.0")]
+    [BepInPlugin("sfk.pinabuildcost", "Pin a Build Cost", "0.2.1")]
     public sealed class PinPlugin : BaseUnityPlugin
     {
         internal static PinPlugin Instance;
@@ -24,6 +24,8 @@ namespace PinABuildCost
         private readonly List<PinRow> visibleRows = new List<PinRow>();
         private PinRow shortcutRow;
         private int lastActivationFrame = -1;
+        private CheckpointOffer pendingRestore, pendingCustom;
+        private Component customOwner;
         private static readonly AccessTools.FieldRef<OverlayManager, GameObject> ActivePanel =
             AccessTools.FieldRefAccess<OverlayManager, GameObject>("m_CurrentlyActive");
 
@@ -43,6 +45,10 @@ namespace PinABuildCost
                 hooks.PatchAll(typeof(CapacityCards));
                 hooks.PatchAll(typeof(EvolutionPlot));
                 hooks.PatchAll(typeof(EvolutionCards));
+                hooks.PatchAll(typeof(PinCheckpoints.ReadGameData));
+                hooks.PatchAll(typeof(PinCheckpoints.LoadKingdom));
+                hooks.PatchAll(typeof(PinCheckpoints.SaveScope));
+                hooks.PatchAll(typeof(PinCheckpoints.WriteGameData));
             }
             catch
             {
@@ -52,7 +58,7 @@ namespace PinABuildCost
             GameManager.OnGameInit += Clear;
             CityManager.OnBuildingRemoved += Removed;
             CityManager.OnBuildingUpgrade += Upgraded;
-            Logger.LogInfo("Pin a Build Cost 0.1.0 ready.");
+            Logger.LogInfo("Pin a Build Cost 0.2.1 ready.");
         }
 
         internal static void TryAttach(Action attach)
@@ -116,10 +122,41 @@ namespace PinABuildCost
         internal void RefreshOffer(PinTarget target)
         {
             if (Pinned != null && target.IsSameOffer(Pinned)) Set(target);
+            else if (pendingCustom != null && customOwner != null && target.Source == customOwner &&
+                target.Operation == pendingCustom.kind && target.Level == pendingCustom.tier)
+                TryAttach(() => Set(target.IsFinished() ? null : target));
+        }
+
+        internal CheckpointOffer Snapshot() => Pinned != null ? CheckpointOffer.Capture(Pinned) :
+            pendingRestore ?? (customOwner != null ? pendingCustom : null);
+
+        internal void QueueRestore(CheckpointOffer saved)
+        {
+            Clear();
+            pendingRestore = saved;
+        }
+
+        private void Restore()
+        {
+            if (pendingRestore == null || GameManager.Instance == null || !GameManager.Instance.IsGameLoaded()) return;
+            var saved = pendingRestore;
+            pendingRestore = null;
+            TryAttach(() => {
+                if (saved.IsCustom)
+                {
+                    customOwner = saved.FindCustomOwner();
+                    if (customOwner != null) pendingCustom = saved;
+                    return;
+                }
+                var target = saved.Resolve();
+                if (target != null && !target.IsFinished() && target.Price() != null) Set(target);
+            });
         }
 
         private void Set(PinTarget target)
         {
+            pendingRestore = pendingCustom = null;
+            customOwner = null;
             Pinned = target;
             refreshAt = 0;
             if (hud != null) hud.gameObject.SetActive(target != null);
@@ -139,7 +176,8 @@ namespace PinABuildCost
 
         private void Removed(BuildingCity building, bool cancelJobs)
         {
-            if (Pinned != null && ReferenceEquals(Pinned.Source, building)) Clear();
+            if ((pendingCustom != null && ReferenceEquals(customOwner, building)) ||
+                (Pinned != null && ReferenceEquals(Pinned.Source, building))) Clear();
         }
 
         private void Upgraded(BuildingCity building, bool fromSave)
@@ -149,6 +187,7 @@ namespace PinABuildCost
 
         private void LateUpdate()
         {
+            Restore();
             var pad = GamepadManager.Instance;
             var next = ResolveShortcut(pad);
             if (next != shortcutRow)

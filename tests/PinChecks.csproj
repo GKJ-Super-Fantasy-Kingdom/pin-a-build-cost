@@ -7,7 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../PinABuildCost.csproj" />
-    <Reference Include="Assembly-CSharp;UnityEngine;UnityEngine.CoreModule;Unity.InputSystem;UnityEngine.UI">
+    <Reference Include="Assembly-CSharp;UnityEngine;UnityEngine.CoreModule;Unity.InputSystem;UnityEngine.UI;UnityEngine.JSONSerializeModule;Newtonsoft.Json">
       <HintPath>$(ManagedDir)\%(Identity).dll</HintPath><Private>false</Private>
     </Reference>
     <Reference Include="BepInEx;0Harmony">

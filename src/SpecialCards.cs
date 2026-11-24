@@ -34,17 +34,22 @@ namespace PinABuildCost
                     var description = __result.transform.Find("TextDescription")?.GetComponent<TMP_Text>()?.text;
                     if (!string.IsNullOrWhiteSpace(description)) title = description;
                 }
-                var retired = UpgradeCards.TrackRemoval(building, offer);
-                var target = new PinTarget(building, building.GetTitle() + " · " + title, () => Costs(offer),
-                    permitted: cost => CityManager.Instance.DidCityEventHappen(offer.ConditionGreyedOut)
-                        && ResourceManager.Instance.CanBeBuilt(cost),
-                    complete: () => offer.eventToTrigger != cityEvent || retired?.Invoke() == true
-                        || CityManager.Instance.DidCityEventHappen(cityEvent)
-                        || !CityManager.Instance.DidCityEventHappen(offer.Condition),
-                    operation: "castle", definition: offer);
-                var row = PinRow.Create(__result, purchase, target);
-                GamepadManager.Instance.SetGameObjectToSelect(row.gameObject);
+                var row = PinRow.Create(__result, purchase, ForEvent(building, offer, title));
+                row.UseAsFocusFallback = true;
             });
+        }
+
+        internal static PinTarget ForEvent(Building building, UIBuildingOverlayElementCityEvent offer, string title)
+        {
+            var cityEvent = offer.eventToTrigger;
+            var retired = UpgradeCards.TrackRemoval(building, offer);
+            return new PinTarget(building, building.GetTitle() + " · " + title, () => Costs(offer),
+                permitted: cost => CityManager.Instance.DidCityEventHappen(offer.ConditionGreyedOut) &&
+                    ResourceManager.Instance.CanBeBuilt(cost),
+                complete: () => offer.eventToTrigger != cityEvent || retired?.Invoke() == true ||
+                    CityManager.Instance.DidCityEventHappen(cityEvent) ||
+                    !CityManager.Instance.DidCityEventHappen(offer.Condition),
+                operation: "castle", definition: offer);
         }
     }
 
@@ -61,20 +66,24 @@ namespace PinABuildCost
         {
             if (__result == null) return;
             PinPlugin.TryAttach(() => {
-                var resource = building.GetBuildingType() == BuildingType.Stables ? ResourceType.Carrier : ResourceType.Chest;
-                int next = building.GetResourceQuantity(resource) + 1;
-                var retired = UpgradeCards.TrackRemoval(building, __instance);
-                var needsSpace = AccessTools.FieldRefAccess<UIBuildingOverlayElementPortal, bool>("checkIfSpaceForUnit");
                 var title = __result.transform.Find("TextName").GetComponent<TMP_Text>().text;
-                var target = new PinTarget(building, building.GetTitle() + " · " + title,
-                    () => Price(__instance, building.GetResourceQuantity(resource)), next,
-                    cost => ResourceManager.Instance.CanBeBuilt(cost) && !DaytimeManager.Instance.IsNight() &&
-                        (!needsSpace(__instance) || UnitManager.Instance.CanAddMoreUnits()),
-                    () => retired?.Invoke() == true || building.GetResourceQuantity(resource) >= next,
-                    "capacity", definition: __instance);
-                var row = PinRow.Create(__result, __result.GetComponent<Button>(), target);
-                GamepadManager.Instance.SetGameObjectToSelect(row.gameObject);
+                var row = PinRow.Create(__result, __result.GetComponent<Button>(), ForCapacity(building, __instance, title));
+                row.UseAsFocusFallback = true;
             });
+        }
+
+        internal static PinTarget ForCapacity(Building building, UIBuildingOverlayElementPortal offer, string title)
+        {
+            var resource = building.GetBuildingType() == BuildingType.Stables ? ResourceType.Carrier : ResourceType.Chest;
+            int next = building.GetResourceQuantity(resource) + 1;
+            var retired = UpgradeCards.TrackRemoval(building, offer);
+            var needsSpace = AccessTools.FieldRefAccess<UIBuildingOverlayElementPortal, bool>("checkIfSpaceForUnit");
+            return new PinTarget(building, building.GetTitle() + " · " + title,
+                () => Price(offer, building.GetResourceQuantity(resource)), next,
+                cost => ResourceManager.Instance.CanBeBuilt(cost) && !DaytimeManager.Instance.IsNight() &&
+                    (!needsSpace(offer) || UnitManager.Instance.CanAddMoreUnits()),
+                () => retired?.Invoke() == true || building.GetResourceQuantity(resource) >= next,
+                "capacity", definition: offer);
         }
     }
 

@@ -10,6 +10,7 @@ namespace PinABuildCost
     {
         private RectTransform bar, frame, viewport;
         private RectTransform selection, tabs, book, empty;
+        private Image[] selectionHeader, tabsHeader;
         private CanvasGroup visibility;
         private bool sizeDirty;
         private Rect lastScreen, lastBar, lastReserved, lastObstacle;
@@ -17,8 +18,15 @@ namespace PinABuildCost
         private Rect[] detailBounds;
         private bool lastSideHidden;
         private Text label, status;
-        private readonly List<ChecklistMark> marks = new List<ChecklistMark>();
-        private readonly List<Text> materials = new List<Text>();
+        private sealed class MaterialRow
+        {
+            internal Text Caption;
+            internal ChecklistMark Mark;
+            internal Image Icon;
+        }
+        private readonly List<MaterialRow> materials = new List<MaterialRow>();
+        private static readonly Color32 MetColor = new Color32(189, 228, 155, 255);
+        private static readonly Color32 ShortColor = new Color32(255, 207, 160, 255);
         private readonly Vector3[] corners = new Vector3[4];
 
         internal static PinHud Create(UIHeader header)
@@ -45,6 +53,8 @@ namespace PinABuildCost
             {
                 hud.selection = overlays.GetOverlaySelection()?.parent as RectTransform;
                 hud.tabs = overlays.GetOverlayTabsSelection() as RectTransform;
+                hud.selectionHeader = HeaderImages(hud.selection);
+                hud.tabsHeader = HeaderImages(hud.tabs);
                 hud.empty = overlays.GetOverlayEmpty() as RectTransform;
             }
             hud.frame = (RectTransform)root.transform;
@@ -94,6 +104,7 @@ namespace PinABuildCost
             sizeDirty |= label.text != title || status.text != (checklist.Status ?? "");
             label.text = title;
             status.text = checklist.Status ?? "";
+            status.color = checklist.Status == CostChecklist.Ready ? MetColor : ShortColor;
             status.gameObject.SetActive(checklist.Status != null);
             for (int i = 0; i < checklist.Items.Length; i++)
             {
@@ -107,21 +118,31 @@ namespace PinABuildCost
                     mark.rectTransform.anchoredPosition = new Vector2(-23, -3);
                     mark.rectTransform.sizeDelta = new Vector2(18, 18);
                     mark.raycastTarget = false;
-                    materials.Add(caption);
-                    marks.Add(mark);
+                    var icon = new GameObject("Resource icon", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
+                    icon.rectTransform.SetParent(caption.rectTransform, false);
+                    icon.rectTransform.anchorMin = icon.rectTransform.anchorMax = icon.rectTransform.pivot = Vector2.up;
+                    icon.rectTransform.sizeDelta = new Vector2(20, 20);
+                    icon.rectTransform.anchoredPosition = new Vector2(-24, -1);
+                    icon.preserveAspect = true;
+                    icon.raycastTarget = false;
+                    materials.Add(new MaterialRow { Caption = caption, Mark = mark, Icon = icon });
                     sizeDirty = true;
                 }
                 var item = checklist.Items[i];
                 var row = materials[i];
-                sizeDirty |= !row.gameObject.activeSelf || row.text != item.Text;
-                row.gameObject.SetActive(true);
-                row.text = item.Text;
-                marks[i].IsMet = item.IsMet;
+                var sprite = RaceManager.Instance.GetResourceIcon(item.Resource);
+                sizeDirty |= !row.Caption.gameObject.activeSelf || row.Caption.text != item.Text ||
+                    (row.Icon.sprite == null) != (sprite == null);
+                row.Caption.gameObject.SetActive(true);
+                row.Caption.text = item.Text;
+                row.Caption.color = item.IsMet ? MetColor : ShortColor;
+                row.Mark.IsMet = item.IsMet;
+                row.Icon.sprite = sprite;
             }
             for (int i = checklist.Items.Length; i < materials.Count; i++)
             {
-                sizeDirty |= materials[i].gameObject.activeSelf;
-                materials[i].gameObject.SetActive(false);
+                sizeDirty |= materials[i].Caption.gameObject.activeSelf;
+                materials[i].Caption.gameObject.SetActive(false);
             }
             if (book == null) book = bar.Find("Daybook") as RectTransform;
             Position();
@@ -142,7 +163,7 @@ namespace PinABuildCost
             var panel = selection != null && selection.gameObject.activeInHierarchy ? selection : tabs;
             if (empty != null && empty.gameObject.activeInHierarchy && empty.childCount > 0)
                 panel = empty.GetChild(empty.childCount - 1) as RectTransform;
-            var obstacle = panel != null && panel.gameObject.activeInHierarchy ? Bounds(panel) : Rect.zero;
+            var obstacle = PanelBounds(panel);
             bool detailsChanged = UpdateDetailBounds();
             bool sideHidden = UIManager.Instance != null && UIManager.Instance.IsHidden();
             if (!sizeDirty && !detailsChanged && sideHidden == lastSideHidden && screen == lastScreen && bar.rect == lastBar && reserved == lastReserved &&
@@ -165,6 +186,26 @@ namespace PinABuildCost
             if (group == null) return;
             foreach (var image in group.GetComponentsInChildren<Image>(true))
                 if (image.sprite != null && image.sprite.border != Vector4.zero) headerDetails.Add(image);
+        }
+
+        private static Image[] HeaderImages(RectTransform panel) =>
+            panel?.parent.Find("HeaderContainer/Header")?.GetComponentsInChildren<Image>(true);
+
+        private Rect PanelBounds(RectTransform panel)
+        {
+            if (panel == null || !panel.gameObject.activeInHierarchy) return Rect.zero;
+            var bounds = Bounds(panel);
+            var images = panel == selection ? selectionHeader : panel == tabs ? tabsHeader : null;
+            // The scrollwork of a native title extends beyond its panel body.
+            if (images != null)
+                foreach (var image in images)
+                    if (image != null && image.isActiveAndEnabled && image.sprite != null)
+                    {
+                        var part = Bounds(image.rectTransform);
+                        bounds.min = Vector2.Min(bounds.min, part.min);
+                        bounds.max = Vector2.Max(bounds.max, part.max);
+                    }
+            return bounds;
         }
 
         private bool UpdateDetailBounds()
@@ -202,7 +243,7 @@ namespace PinABuildCost
                     if (detail.width > 0 && x < detail.xMax + 6 && x + width > detail.xMin - 6 && detail.yMin < top)
                         y = Mathf.Min(y, detail.yMin - 6);
                 if (y - height < bottom + 6) return false;
-                if (!new Rect(x, y - height, width, height).Overlaps(obstacle) || obstacle.width == 0)
+                if (obstacle.width == 0 || !new Rect(x - 6, y - height - 6, width + 12, height + 12).Overlaps(obstacle))
                 {
                     frame.anchoredPosition = new Vector2(Mathf.Round(x + width - bar.rect.xMin), Mathf.Floor(y - bar.rect.yMin));
                     return true;
@@ -230,7 +271,14 @@ namespace PinABuildCost
                 }
                 PlaceLine(label, 12);
                 foreach (var row in materials)
-                    if (row.gameObject.activeSelf) PlaceLine(row, 35);
+                {
+                    if (!row.Caption.gameObject.activeSelf) continue;
+                    bool showIcon = width >= 200 && row.Icon.sprite != null;
+                    row.Icon.enabled = showIcon;
+                    int left = showIcon ? 59 : 35;
+                    row.Mark.rectTransform.anchoredPosition = new Vector2(12 - left, -3);
+                    PlaceLine(row.Caption, left);
+                }
                 if (status.gameObject.activeSelf) PlaceLine(status, 12);
                 frame.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, y + 6);
                 sizeDirty = false;

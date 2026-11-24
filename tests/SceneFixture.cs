@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using HarmonyLib;
+using Newtonsoft.Json;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -13,6 +14,14 @@ internal static class SceneFixture
     private static readonly HashSet<GameObject> inactive = new HashSet<GameObject>();
     internal static readonly HashSet<GameObject> HiddenByParent = new HashSet<GameObject>();
     internal static readonly HashSet<Object> Destroyed = new HashSet<Object>();
+    internal static readonly Dictionary<Object, string> Names = new Dictionary<Object, string>();
+    internal static readonly Dictionary<Component, Transform> Locations = new Dictionary<Component, Transform>();
+    internal static readonly Dictionary<Transform, Vector3> Positions = new Dictionary<Transform, Vector3>();
+    internal static string Name(Object obj) => Names[obj];
+    internal static Transform Location(Component component) => Locations[component];
+    internal static void Position(Transform transform, out Vector3 value) => value = Positions[transform];
+    internal static object FromJson(string json, object destination, Type type) => JsonConvert.DeserializeObject(json, type);
+    internal static string ToJson(object data, bool pretty) => CheckpointChecks.NativeJson((SuperFantasyKingdom.GameData)data);
     internal static int Frame;
     internal static int FrameCount() => Frame;
 

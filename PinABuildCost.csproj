@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>0.1.0</Version>
+    <Version>0.2.1</Version>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <GameDir Condition="'$(GameDir)' == ''">D:\SteamLibrary\steamapps\common\Super Fantasy Kingdom</GameDir>
     <ProfileDir Condition="'$(ProfileDir)' == ''">$(APPDATA)\Thunderstore Mod Manager\DataFolder\SuperFantasyKingdom\profiles\Daybook Dev</ProfileDir>
@@ -9,6 +9,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="src/**/*.cs" />
+    <Reference Include="Newtonsoft.Json;UnityEngine.JSONSerializeModule;Unity.Localization;Unity.ResourceManager">
+      <HintPath>$(ManagedDir)\%(Identity).dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="BepInEx;0Harmony">
       <HintPath>$(ProfileDir)\BepInEx\core\%(Identity).dll</HintPath>
       <Private>false</Private>
