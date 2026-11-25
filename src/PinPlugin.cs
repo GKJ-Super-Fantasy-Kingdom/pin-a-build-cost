@@ -10,7 +10,7 @@ using UnityEngine.EventSystems;
 
 namespace PinABuildCost
 {
-    [BepInPlugin("sfk.pinabuildcost", "Pin a Build Cost", "0.2.1")]
+    [BepInPlugin("sfk.pinabuildcost", "Pin a Build Cost", "0.2.2")]
     public sealed class PinPlugin : BaseUnityPlugin
     {
         internal static PinPlugin Instance;

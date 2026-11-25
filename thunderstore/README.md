@@ -18,8 +18,6 @@ Pin a building or upgrade to keep its material checklist beside the resource bar
 
 ## Screenshots
 
-Captured in version 0.2.1 at 1920 × 1080 in borderless fullscreen with a virtual Xbox-style controller. The second capture uses a copied kingdom with two boards added for the Ready check.
-
 ![Storage upgrade pinned with two ingots missing and controller focus on Wall’s Replace Pin button](https://raw.githubusercontent.com/GKJ-Super-Fantasy-Kingdom/pin-a-build-cost/main/docs/screenshots/0.2.1/castle-storage-short-1x.png)
 
 **1× UI scale.** Storage needs five ingots and the kingdom has three. The checklist shows two missing while Wall offers **Replace Pin**.
@@ -30,15 +28,12 @@ Captured in version 0.2.1 at 1920 × 1080 in borderless fullscreen with a virtua
 
 ## Compatibility
 
-- Tested on Super Fantasy Kingdom 0.8.068. The checklist follows changes to the game’s prices, available stock and purchase rules. Mods with private inventories or their own purchase menus can add pin support through the optional integration API. If a price cannot be read, the checklist shows **Cost Unavailable**.
-- With [Daybook](https://thunderstore.io/c/super-fantasy-kingdom/p/GKJ/Daybook/) 0.4.2 and [Production Bottlenecks](https://thunderstore.io/c/super-fantasy-kingdom/p/GKJ/ProductionBottlenecks/) 0.2.2, opening the ledger or the Blocked Buildings list preserved the pin at both UI scales.
-- With [LoneBonfire](https://thunderstore.io/c/super-fantasy-kingdom/p/ownlyme/LoneBonfire/) 1.1.1, a second Bonfire shows **Requirements Pending** when you have enough materials but already own a Bonfire.
-- With [CheatMenu](https://thunderstore.io/c/super-fantasy-kingdom/p/ILM/CheatMenu/) 1.0.3, a doubled coin award reduced the pinned shortage by the full amount received.
-- On game 0.8.067, [DemolishAll](https://thunderstore.io/c/super-fantasy-kingdom/p/sfkbutter/DemolishAll/) 1.0.3 failed to add its demolition button, so that action could not be tested. The game’s own demolition action cleared the demolished building’s upgrade pin.
-- If a purchase lists one material twice, the checklist shows its combined total. **Ready** still follows the game’s purchase check, which can accept the two entries separately.
-- The shortcut follows the game’s UI/Tab binding. If a panel disables that action and your binding uses a custom hold or release, click the pin button or use focused controller confirm.
-- The HUD leaves room for native controls. If neither side has enough space, the checklist hides until space opens up and the target stays pinned.
-- If another mod supplies a private purchase, reopen its card after continuing so it can provide its price and inventory again. The pin can return when the same owner and purchase can be identified.
+- Works with Super Fantasy Kingdom **0.8.068** and the other [GKJ mods](https://thunderstore.io/c/super-fantasy-kingdom/p/GKJ/).
+- The checklist follows the game’s current prices, stock, and purchase rules. Extra purchase rules can show **Requirements Pending** even when you have the materials.
+- [Daybook](https://thunderstore.io/c/super-fantasy-kingdom/p/GKJ/Daybook/), [Production Bottlenecks](https://thunderstore.io/c/super-fantasy-kingdom/p/GKJ/ProductionBottlenecks/), and [Worker Presets](https://thunderstore.io/c/super-fantasy-kingdom/p/GKJ/WorkerPresets/) can share the building panel and HUD with a pin.
+- With [Lone Bonfire](https://thunderstore.io/c/super-fantasy-kingdom/p/ownlyme/LoneBonfire/), a second bonfire can still show **Requirements Pending**. Mods that manage their own prices or inventory can supply pin support. Reopen the offer after Continue if it needs to provide its cost again.
+- If space is tight, the checklist hides until room opens and keeps your target pinned. If a panel blocks the shortcut, use the pin button or focus it and confirm.
+- These community mods can share the same profile. [Achievement Enabler](https://thunderstore.io/c/super-fantasy-kingdom/p/ownlyme/AchievementEnabler/), [Bakery Uses Wheat](https://thunderstore.io/c/super-fantasy-kingdom/p/ownlyme/BakeryUsesWheat/), [More Relics](https://thunderstore.io/c/super-fantasy-kingdom/p/ownlyme/MoreRelics/), [Right Click Skip](https://thunderstore.io/c/super-fantasy-kingdom/p/ownlyme/RightClickSkip/), and [Tavern Food Priorities](https://thunderstore.io/c/super-fantasy-kingdom/p/ownlyme/TavernFoodPriorities/).
 
 ## Installation
 
