@@ -122,9 +122,18 @@ namespace PinABuildCost
             private static void Finalizer(SaveContext __state) => writing = __state;
         }
 
-        [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.Save), typeof(string), typeof(string))]
+        [HarmonyPatch]
         internal static class WriteGameData
         {
+            private static MethodBase TargetMethod()
+            {
+                var manager = typeof(SaveManager);
+                const string method = nameof(SaveManager.Save);
+                // 0.8.070 adds a backup flag. Both paths still write the current checkpoint.
+                return AccessTools.Method(manager, method, new[] { typeof(string), typeof(string), typeof(bool) })
+                    ?? AccessTools.Method(manager, method, new[] { typeof(string), typeof(string) });
+            }
+
             private static void Prefix(string __0, ref string __1)
             {
                 if (writing?.Pin == null || writing.File != __0) return;

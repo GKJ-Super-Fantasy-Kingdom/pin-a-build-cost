@@ -113,7 +113,8 @@ namespace PinABuildCost
                 long missing = free ? 0 : entry.Value - stock(entry.Key);
                 bool met = missing <= 0;
                 allMet &= met;
-                string amount = free ? "Free" : met ? $"{entry.Value}/{entry.Value}" : $"{missing} short";
+                string amount = free ? "Free" : $"{entry.Value - Math.Max(missing, 0)}/{entry.Value}";
+                if (!met) amount += $" · {missing} short";
                 items[index++] = new MaterialCheck(entry.Key, name(entry.Key) + " · " + amount, met);
             }
             // Native purchases can accept separate entries for the same resource. Keep

@@ -50,14 +50,14 @@ internal static class Checks
             Check(mixed.Items.Select(item => item.Resource).SequenceEqual(new[] { ResourceType.Board, ResourceType.Stone }),
                 "checklist carries one native resource identity per aggregated material");
             var repriced = PinTarget.Describe(new[] { new ResourceAmount(ResourceType.Ingot, 5) }, stock, _ => "Material");
-            Check(repriced.Items.Single().Resource == ResourceType.Ingot && repriced.Items.Single().Text == "Material · 3 short",
+            Check(repriced.Items.Single().Resource == ResourceType.Ingot && repriced.Items.Single().Text == "Material · 2/5 · 3 short",
                 "runtime price changes keep the icon tied to the live type independently of its localized name");
             var nativeOffer = new PinTarget(first, "Native split price", () => costs,
                 permitted: quote => quote.All(part => stock(part.type) >= part.amount));
             var split = nativeOffer.Read(false, stock, name);
-            Check(split.Status == "Ready" && split.Items[0].Text == "Board · 3 short",
+            Check(split.Status == "Ready" && split.Items[0].Text == "Board · 7/10 · 3 short",
                 "native purchase permits each split entry while the checklist keeps the total");
-            Check(mixed.Items.Length == 2 && mixed.Items[0].Text == "Board · 3 short" && !mixed.Items[0].IsMet &&
+            Check(mixed.Items.Length == 2 && mixed.Items[0].Text == "Board · 7/10 · 3 short" && !mixed.Items[0].IsMet &&
                 mixed.Items[1].Text == "Stone · 2/2" && mixed.Items[1].IsMet && mixed.Status == null,
                 "combine repeated costs and retain a checked row alongside a shortage");
             boards = 10;
@@ -66,7 +66,7 @@ internal static class Checks
                 "all material rows stay checked when ready");
             boards = 4;
             var reopened = PinTarget.Describe(costs, stock, name);
-            Check(!reopened.Items[0].IsMet && reopened.Items[0].Text == "Board · 6 short" && reopened.Items[1].IsMet,
+            Check(!reopened.Items[0].IsMet && reopened.Items[0].Text == "Board · 4/10 · 6 short" && reopened.Items[1].IsMet,
                 "spending unchecks only the affected requirement");
             Check(PinTarget.Describe(costs, t => 0, name).Items.All(row => !row.IsMet), "multiple missing materials");
             Check(PinTarget.Describe(new ResourceAmount[0], stock, name).Status == "Ready" &&
@@ -78,9 +78,9 @@ internal static class Checks
             bool gate = true;
             var addedBuilding = new PinTarget(first, "Content pack mill", () => live,
                 permitted: quote => gate && quote.All(part => stock(part.type) >= part.amount));
-            Check(addedBuilding.Read(false, stock, name).Items.Single().Text == "Board · 6 short", "added building reads current stock");
+            Check(addedBuilding.Read(false, stock, name).Items.Single().Text == "Board · 4/10 · 6 short", "added building reads current stock");
             live = new[] { new ResourceAmount(ResourceType.Stone, 5) };
-            Check(addedBuilding.Read(false, stock, name).Items.Single().Text == "Stone · 3 short", "open pin follows a new resource mix without a city event");
+            Check(addedBuilding.Read(false, stock, name).Items.Single().Text == "Stone · 2/5 · 3 short", "open pin follows a new resource mix without a city event");
             live[0].amount = 2;
             gate = false;
             var blocked = addedBuilding.Read(false, stock, name);
@@ -91,7 +91,7 @@ internal static class Checks
                 waived.Items[0].Text == "Stone · Free", "free requirements show a check without claiming stock");
             gate = true;
             Check(addedBuilding.Read(false, stock, name).Status == "Ready", "external gate can reopen");
-            Check(addedBuilding.Read(false, t => 0, name).Items.Single().Text == "Stone · 2 short", "withdrawn stock restores the shortage");
+            Check(addedBuilding.Read(false, t => 0, name).Items.Single().Text == "Stone · 0/2 · 2 short", "withdrawn stock restores the shortage");
             var capacity = new PinTarget(first, "Chest", () => live, 2, operation: "capacity");
             Check(!capacity.IsSameOffer(level) && !capacity.CompletedUpgrade(first, 2), "capacity and level upgrades on the same source stay independent");
             var definition = new FixedUpgrade();

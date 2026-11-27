@@ -10,7 +10,7 @@ using UnityEngine.EventSystems;
 
 namespace PinABuildCost
 {
-    [BepInPlugin("sfk.pinabuildcost", "Pin a Build Cost", "0.2.2")]
+    [BepInPlugin("sfk.pinabuildcost", "Pin a Build Cost", "0.2.3")]
     public sealed class PinPlugin : BaseUnityPlugin
     {
         internal static PinPlugin Instance;
@@ -58,7 +58,7 @@ namespace PinABuildCost
             GameManager.OnGameInit += Clear;
             CityManager.OnBuildingRemoved += Removed;
             CityManager.OnBuildingUpgrade += Upgraded;
-            Logger.LogInfo("Pin a Build Cost 0.2.1 ready.");
+            Logger.LogInfo($"{Info.Metadata.Name} {Info.Metadata.Version} ready.");
         }
 
         internal static void TryAttach(Action attach)
@@ -241,6 +241,7 @@ namespace PinABuildCost
             CityManager.OnBuildingRemoved -= Removed;
             CityManager.OnBuildingUpgrade -= Upgraded;
             hooks?.UnpatchSelf();
+            PinButtonSprites.Release();
             if (hud != null) Destroy(hud.gameObject);
             Instance = null;
         }

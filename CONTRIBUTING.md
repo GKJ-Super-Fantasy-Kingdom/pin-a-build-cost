@@ -32,8 +32,8 @@ The pin uses the game's button artwork and focus highlight. When another action 
 ## Local import
 
 1. Coordinate a free test session if others are using the game. In Thunderstore Mod Manager, select **Super Fantasy Kingdom** and a disposable test profile.
-2. Use **Settings → Import local mod**, then choose `dist/PinABuildCost-0.2.1.zip`. Confirm the mod and both BepInEx dependencies are enabled. Enable Daybook in the same profile for the HUD check.
-3. Use **Start modded** and open a building plot. Each offered building should have a **Pin Cost** action. Look for `Pin a Build Cost 0.2.1 ready.` in the BepInEx log.
+2. Use **Settings → Import local mod**, then choose `dist/PinABuildCost-0.2.3.zip`. Confirm the mod and both BepInEx dependencies are enabled. Enable Daybook in the same profile for the HUD check.
+3. Use **Start modded** and open a building plot. Each offered building should have a **Pin Cost** action. Look for `Pin a Build Cost 0.2.3 ready.` in the BepInEx log.
 
 ## Controller playtest
 
@@ -55,4 +55,4 @@ python tests/run.py
 python package.py
 ```
 
-The default paths use the Steam install on D: and the local Daybook Dev profile. For other paths, pass `-p:GameDir="..."` and `-p:ProfileDir="..."` to the build and `--game "..." --profile "..."` to the check runner. Offline checks cover changing prices and stock, eligibility, pin identity and completion, and installing the shipped Harmony hooks against game 0.8.068. Embedded Mono can report unresolved Unity internal calls outside a scene. A successful check run exits with code 0. The controller playtest above requires a running game.
+The default paths use the Steam install on D: and the local Daybook Dev profile. For other paths, pass `-p:GameDir="..."` and `-p:ProfileDir="..."` to the build and `--game "..." --profile "..."` to the check runner. Offline checks cover changing prices and stock, eligibility, pin identity and completion, and the native checkpoint writer on 0.8.069 and 0.8.070. Embedded Mono can report unresolved Unity internal calls outside a scene. A successful check run exits with code 0. The controller playtest above requires a running game.

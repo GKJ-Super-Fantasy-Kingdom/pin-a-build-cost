@@ -18,6 +18,7 @@ namespace PinABuildCost
         private Rect[] detailBounds;
         private bool lastSideHidden;
         private Text label, status;
+        private Image statusRule;
         private sealed class MaterialRow
         {
             internal Text Caption;
@@ -86,8 +87,7 @@ namespace PinABuildCost
             hud.label.font = style.font;
             hud.label.fontSize = 24;
             hud.label.fontStyle = style.fontStyle;
-            // Resource counters change color at their storage limit. The pin is neutral text.
-            hud.label.color = Color.white;
+            hud.label.color = new Color32(255, 241, 212, 255);
             hud.label.alignment = TextAnchor.UpperLeft;
             hud.label.supportRichText = false;
             hud.label.raycastTarget = false;
@@ -95,6 +95,12 @@ namespace PinABuildCost
             textRect.anchorMin = textRect.anchorMax = textRect.pivot = Vector2.up;
             hud.status = Instantiate(hud.label, hud.frame);
             hud.status.name = "Purchase status";
+            hud.statusRule = new GameObject("Status divider", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
+            hud.statusRule.rectTransform.SetParent(hud.frame, false);
+            hud.statusRule.rectTransform.anchorMin = hud.statusRule.rectTransform.anchorMax =
+                hud.statusRule.rectTransform.pivot = Vector2.up;
+            hud.statusRule.color = new Color32(159, 120, 83, 255);
+            hud.statusRule.raycastTarget = false;
             return hud;
         }
 
@@ -106,6 +112,7 @@ namespace PinABuildCost
             status.text = checklist.Status ?? "";
             status.color = checklist.Status == CostChecklist.Ready ? MetColor : ShortColor;
             status.gameObject.SetActive(checklist.Status != null);
+            statusRule.enabled = checklist.Status != null && checklist.Items.Length > 0;
             for (int i = 0; i < checklist.Items.Length; i++)
             {
                 if (i == materials.Count)
@@ -278,6 +285,12 @@ namespace PinABuildCost
                     int left = showIcon ? 59 : 35;
                     row.Mark.rectTransform.anchoredPosition = new Vector2(12 - left, -3);
                     PlaceLine(row.Caption, left);
+                }
+                if (statusRule.enabled)
+                {
+                    statusRule.rectTransform.sizeDelta = new Vector2(width - 24, 1);
+                    statusRule.rectTransform.anchoredPosition = new Vector2(12, -Mathf.Ceil(y + 1));
+                    y += 5;
                 }
                 if (status.gameObject.activeSelf) PlaceLine(status, 12);
                 frame.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, y + 6);

@@ -88,7 +88,11 @@ namespace PinABuildCost
                 bg.pixelsPerUnitMultiplier = sourceImage.pixelsPerUnitMultiplier;
             }
             button.colors = style.colors;
-            button.spriteState = style.spriteState;
+            var sprites = style.spriteState;
+            if (sprites.selectedSprite != null) sprites.highlightedSprite = sprites.selectedSprite;
+            if (style == nativeButton && style.transition == Selectable.Transition.SpriteSwap)
+                sprites.pressedSprite = PinButtonSprites.OutlinedPress(sprites.selectedSprite, sprites.pressedSprite);
+            button.spriteState = sprites;
             button.transition = style.transition == Selectable.Transition.SpriteSwap
                 ? Selectable.Transition.SpriteSwap : Selectable.Transition.ColorTint;
 
@@ -217,9 +221,9 @@ namespace PinABuildCost
             var line = face.GetComponent<HorizontalLayoutGroup>();
             float textWidth = caption.preferredWidth;
             bool reserveGlyph = glyph.gameObject.activeSelf;
-            if (leftButton != null && rightButton != null)
+            if (actionStrip == null || (leftButton != null && rightButton != null))
             {
-                // Reserve the largest action before a pin or focus change sizes the dialog.
+                // Castle and dialog buttons keep the same width across actions and focus changes.
                 var longest = string.IsNullOrEmpty(bindingText) ? PinTarget.ReplaceLabel : bindingText + "  " + PinTarget.ReplaceLabel;
                 textWidth = Mathf.Max(textWidth, caption.GetPreferredValues(longest).x);
                 reserveGlyph = glyph.sprite != null;

@@ -68,8 +68,15 @@ internal static class CheckpointChecks
         template["neighborModTestField"] = new JObject { ["enabled"] = true };
         var file = Path.Combine(Root, "human_game.data");
         File.WriteAllText(file, template.ToString());
+        var saveWithBackupFlag = AccessTools.Method(typeof(SaveManager), nameof(SaveManager.Save),
+            new[] { typeof(string), typeof(string), typeof(bool) });
+        var nativeWriter = saveWithBackupFlag ?? AccessTools.Method(typeof(SaveManager), nameof(SaveManager.Save),
+            new[] { typeof(string), typeof(string) });
         foreach (var type in new[] { typeof(PinCheckpoints.ReadGameData), typeof(PinCheckpoints.SaveScope),
             typeof(PinCheckpoints.WriteGameData), typeof(PinCheckpoints.LoadKingdom) }) harmony.PatchAll(type);
+        check(Harmony.GetPatchInfo(nativeWriter)?.Prefixes.Count(p => p.owner == harmony.Id &&
+            p.PatchMethod.DeclaringType == typeof(PinCheckpoints.WriteGameData)) == 1,
+            "exactly one checkpoint writer on the native Save overload");
         void Stub(Type type, string method, string handler) => harmony.Patch(AccessTools.Method(type, method),
             prefix: new HarmonyMethod(typeof(CheckpointChecks), handler));
         Stub(typeof(SaveManager), "GetFilePath", nameof(SavePath));
@@ -111,6 +118,9 @@ internal static class CheckpointChecks
         var pinnedStorage = CastleUpgradeCards.ForEvent(castle, storage, "Increase storage");
         var pinnedWall = CastleUpgradeCards.ForEvent(castle, wall, "Wall");
         plugin.Toggle(pinnedStorage);
+        var backup = file + ".bak";
+        const string ExistingBackup = "preexisting backup";
+        if (saveWithBackupFlag != null) File.WriteAllText(backup, ExistingBackup);
         manager.Save();
         var dawnStorage = File.ReadAllText(file);
         var data = saves.LoadGameData("human_game");
@@ -118,7 +128,8 @@ internal static class CheckpointChecks
         string originalJson = NativeJson(native);
         check(first != null && data.hash == native.hash &&
             dawnStorage.StartsWith(originalJson.Substring(0, originalJson.Length - 1), StringComparison.Ordinal) &&
-            (bool)JObject.Parse(dawnStorage)["neighborModTestField"]["enabled"],
+            (bool)JObject.Parse(dawnStorage, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error })
+                ["neighborModTestField"]["enabled"],
             "native save writer and loader round-trip the pin in a copied profile without changing native fields");
         var liveStorage = Event(CityEvent.UpgradeBase1, 18);
         var liveWall = Event(CityEvent.WallsWood, 12);
@@ -152,9 +163,12 @@ internal static class CheckpointChecks
         Continue(saves.LoadGameData("human_game"));
         check(plugin.Pinned.Definition == liveWall && plugin.Pinned.Price()[0].amount == 12,
             "next checkpoint keeps the replacement Wall and current quote");
-        check(File.ReadAllText(file + ".bak") == dawnStorage &&
-            PinCheckpoints.For(JsonUtility.FromJson<GameData>(File.ReadAllText(file + ".bak"))).choice == first.choice,
-            "replaying the native dawn backup restores Storage instead of the later Wall pin");
+        if (saveWithBackupFlag != null)
+            check(File.ReadAllText(backup) == ExistingBackup, "kingdom Save preserves the prior backup when doBackUp is false");
+        else
+            check(File.ReadAllText(backup) == dawnStorage &&
+                PinCheckpoints.For(JsonUtility.FromJson<GameData>(File.ReadAllText(backup))).choice == first.choice,
+                "replaying the native dawn backup restores Storage instead of the later Wall pin");
         Continue(JsonUtility.FromJson<GameData>(dawnStorage));
         check(plugin.Pinned.Definition == liveStorage, "continue from replayed dawn rebinds the prior Storage pin in the HUD model");
         Continue(JsonUtility.FromJson<GameData>(dawnWall));
@@ -171,7 +185,9 @@ internal static class CheckpointChecks
         check(PinCheckpoints.For(JsonUtility.FromJson<GameData>(broken.ToString())) == null, "malformed extension leaves the native save readable");
         plugin.Toggle(plugin.Pinned);
         manager.Save();
-        check(PinCheckpoints.For(saves.LoadGameData("human_game")) == null, "unpin is recorded at the following checkpoint");
+        var unpinned = File.ReadAllText(file);
+        check(JObject.Parse(unpinned)["pinABuildCostV1"] == null &&
+            PinCheckpoints.For(saves.LoadGameData("human_game")) == null, "unpin is recorded at the following checkpoint");
 
         var tavern = SceneFixture.New<TavernSaveManager>();
         var beforeTavern = JsonUtility.FromJson<GameData>(dawnStorage);
@@ -183,6 +199,7 @@ internal static class CheckpointChecks
         var afterTavern = saves.LoadGameData("human_game");
         check(afterTavern.day == beforeTavern.day && PinCheckpoints.For(afterTavern)?.choice == first.choice,
             "tavern checkpoint rewrite carries its own Storage pin into the new native day and hash");
+        check(File.ReadAllText(backup) == unpinned, "tavern Save retains the previous checkpoint with the native backup behavior");
         Continue(afterTavern);
         Continue(JsonUtility.FromJson<GameData>(template.ToString()));
         check(plugin.Pinned == null && plugin.Snapshot() == null, "continuing a legacy save clears a previously active pin");

@@ -1,6 +1,6 @@
 {
   "name": "PinABuildCost",
-  "version_number": "0.2.2",
+  "version_number": "0.2.3",
   "website_url": "https://github.com/GKJ-Super-Fantasy-Kingdom/pin-a-build-cost",
   "description": "Pin a construction or upgrade cost, track the resources still missing, and restore the pin when you continue your kingdom.",
   "dependencies": [

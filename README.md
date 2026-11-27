@@ -5,7 +5,7 @@ Pin a building or upgrade to keep its material checklist beside the resource bar
 ## Features
 
 - Track one purchase at a time, including an unaffordable upgrade such as the Castle’s **Increase storage** or **Wall**.
-- The checklist uses the same material icons as the purchase card when space allows. Each material gets a green check when you have enough. Spend some of it and the row shows how much you still need. The checklist refreshes every half second.
+- Each checklist row shows how much you have, the full cost, and any shortage. A check appears when you have enough, and the checklist uses the purchase card’s material icons when space allows.
 - **Ready** means the purchase check passes. **Requirements Pending** means you have the materials but another rule still blocks the purchase.
 - Building the tracked design on any plot clears a construction pin. An upgrade pin clears when that purchase completes on the chosen building. Demolishing a building also clears its upgrade pin.
 - Continuing a kingdom restores the pin from its saved checkpoint at the current price. Replaying an earlier dawn restores that dawn’s pin. Old saves without a pin and new runs start empty.
@@ -18,19 +18,19 @@ Pin a building or upgrade to keep its material checklist beside the resource bar
 
 ## Screenshots
 
-Captured in version 0.2.1 at 1920 × 1080 in borderless fullscreen with a virtual Xbox-style controller. The second capture uses a copied kingdom with two boards added for the Ready check.
+![Human Castle at 1× with a Storage pin, a two-ingot shortage, and Replace Pin under Wall.](docs/screenshots/current/human-castle-pin-1x.png)
 
-![Storage upgrade pinned with two ingots missing and controller focus on Wall’s Replace Pin button](https://raw.githubusercontent.com/GKJ-Super-Fantasy-Kingdom/pin-a-build-cost/main/docs/screenshots/0.2.1/castle-storage-short-1x.png)
+**Human, 1× UI scale.** The restored Storage pin shows three of five ingots. Wall offers **Replace Pin**.
 
-**1× UI scale.** Storage needs five ingots and the kingdom has three. The checklist shows two missing while Wall offers **Replace Pin**.
+![Undead Castle at 1.5× with a Storage pin, a three-bone shortage, and Replace Pin under Wall.](docs/screenshots/current/undead-castle-pin-1p5x.png)
 
-![Restored Wall pin showing a checked board row, six of six boards and Ready beside the Castle panel](https://raw.githubusercontent.com/GKJ-Super-Fantasy-Kingdom/pin-a-build-cost/main/docs/screenshots/0.2.1/castle-wall-ready-1.5x.png)
+**Undead, 1.5× UI scale.** The restored Storage pin shows zero of three bone. **Unpin** is focused.
 
-**1.5× UI scale.** Wall is pinned after Continue. The six boards cover its full cost, and the checklist clears the Castle title ribbon.
+Captured on game 0.8.070 at 1920 × 1080 with virtual controller input.
 
 ## Compatibility
 
-- Tested on Super Fantasy Kingdom 0.8.068. The checklist follows changes to the game’s prices, available stock and purchase rules. Mods with private inventories or their own purchase menus can add pin support through the optional integration API. If a price cannot be read, the checklist shows **Cost Unavailable**.
+- Version 0.2.3 was tested on Super Fantasy Kingdom 0.8.070. The checklist follows changes to the game’s prices, available stock and purchase rules. Mods with private inventories or their own purchase menus can add pin support through the optional integration API. If a price cannot be read, the checklist shows **Cost Unavailable**.
 - With [Daybook](https://thunderstore.io/c/super-fantasy-kingdom/p/GKJ/Daybook/) 0.4.2 and [Production Bottlenecks](https://thunderstore.io/c/super-fantasy-kingdom/p/GKJ/ProductionBottlenecks/) 0.2.2, opening the ledger or the Blocked Buildings list preserved the pin at both UI scales.
 - With [LoneBonfire](https://thunderstore.io/c/super-fantasy-kingdom/p/ownlyme/LoneBonfire/) 1.1.1, a second Bonfire shows **Requirements Pending** when you have enough materials but already own a Bonfire.
 - With [CheatMenu](https://thunderstore.io/c/super-fantasy-kingdom/p/ILM/CheatMenu/) 1.0.3, a doubled coin award reduced the pinned shortage by the full amount received.
@@ -44,7 +44,5 @@ Captured in version 0.2.1 at 1920 × 1080 in borderless fullscreen with a virtua
 
 1. Select **Super Fantasy Kingdom** and your profile in Thunderstore Mod Manager. Use **Install with App** on this listing.
 2. Allow the manager to install [BepInExPack](https://thunderstore.io/c/super-fantasy-kingdom/p/BepInEx/BepInExPack/) and [HideManagerGameObject_Config](https://thunderstore.io/c/super-fantasy-kingdom/p/BepInEx/HideManagerGameObject_Config/), then launch the modded game.
-
-## Support
 
 [Support GKJ Games on Ko-fi](https://ko-fi.com/gkj_games)

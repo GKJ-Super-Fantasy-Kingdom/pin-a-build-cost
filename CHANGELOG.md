@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3
+
+- Restore pin saving and Continue on Super Fantasy Kingdom 0.8.070, preserving the game's native checkpoint backup behavior.
+- Show the amount on hand, the full cost, and the shortage together on each material row.
+- Keep pin buttons the same width when the action changes and show the native-style outline on hover, focus, and press.
+
 ## 0.2.2
 
 Clarify the mod’s description and compatibility for players.

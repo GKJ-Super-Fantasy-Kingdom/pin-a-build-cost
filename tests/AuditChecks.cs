@@ -63,7 +63,7 @@ internal static class AuditChecks
         Func<ResourceType, string> name = type => type.ToString();
         var native = new PinTarget(unit, "Split quote", () => split, permitted: manager.CanBeBuilt);
         var quote = native.Read(false, type => manager.GetResourceAvailableAmount(type), name);
-        check(quote.Status == "Ready" && quote.Items.Single().Text == "Board · 3 short",
+        check(quote.Status == "Ready" && quote.Items.Single().Text == "Board · 7/10 · 3 short",
             "installed game's affordability method accepts separate entries with seven available");
         var externalDll = Environment.GetEnvironmentVariable("PIN_TEST_LONE_BONFIRE");
         if (!string.IsNullOrEmpty(externalDll)) CheckLoneBonfire(check, harmony, manager, externalDll);
